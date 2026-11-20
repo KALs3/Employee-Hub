@@ -11,6 +11,7 @@ import {
   TextInput,
 } from 'react-native';
 import { useLocalSearchParams } from 'expo-router';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { useRequestDetail, useCancelRequest, useDecideRequest } from '@/hooks/use-requests';
 import { useAuth } from '@/hooks/use-auth';
@@ -66,6 +67,7 @@ function getActionIcon(action: string): keyof typeof Ionicons.glyphMap {
 
 export default function RequestDetailScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
+  const insets = useSafeAreaInsets();
   const { user, role } = useAuth();
   const { data: request, isLoading, isError, error, refetch } = useRequestDetail(id as string);
   const cancelMutation = useCancelRequest();
@@ -146,7 +148,10 @@ export default function RequestDetailScreen() {
 
   return (
     <View style={styles.container}>
-      <ScrollView contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
+      <ScrollView
+        contentContainerStyle={[styles.scrollContent, { paddingBottom: insets.bottom + 100 }]}
+        showsVerticalScrollIndicator={false}
+      >
         {/* Main Details Card */}
         <View style={styles.card}>
           <View style={styles.cardHeaderRow}>
@@ -256,7 +261,7 @@ export default function RequestDetailScreen() {
 
       {/* Floating Bottom Action Bars */}
       {isOwner && isPending ? (
-        <View style={styles.floatingBar}>
+        <View style={[styles.floatingBar, { paddingBottom: Math.max(insets.bottom, 16) }]}>
           <TouchableOpacity
             style={styles.cancelButton}
             onPress={handleCancel}
@@ -276,7 +281,7 @@ export default function RequestDetailScreen() {
       ) : null}
 
       {isManager && isPending ? (
-        <View style={styles.floatingBarRow}>
+        <View style={[styles.floatingBarRow, { paddingBottom: Math.max(insets.bottom, 16) }]}>
           <TouchableOpacity
             style={[styles.actionBtn, styles.rejectBtn]}
             onPress={() => openDecisionModal('rejected')}
