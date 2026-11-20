@@ -1,5 +1,5 @@
 -- ====================================================================
--- Employee Hub: Seed Data
+-- Employee Hub: Seed Data (GoTrue & Supabase Compliant)
 -- Demo Users:
 -- Manager 1: sarah.manager@company.com / Password123!
 -- Manager 2: marcus.manager@company.com / Password123!
@@ -11,7 +11,6 @@
 
 CREATE EXTENSION IF NOT EXISTS pgcrypto;
 
--- Helper UUIDs for predictable references
 DO $$
 DECLARE
   v_m1_id UUID := '11111111-1111-1111-1111-111111111111';
@@ -27,21 +26,58 @@ DECLARE
   v_req4 UUID := 'a4444444-4444-4444-4444-444444444444';
   v_req5 UUID := 'a5555555-5555-5555-5555-555555555555';
   v_req6 UUID := 'a6666666-6666-6666-6666-666666666666';
-BEGIN
-  -- Insert auth users if not existing
-  INSERT INTO auth.users (
-    id, instance_id, aud, role, email, encrypted_password, email_confirmed_at,
-    raw_app_meta_data, raw_user_meta_data, created_at, updated_at
-  ) VALUES
-    (v_m1_id, '00000000-0000-0000-0000-000000000000', 'authenticated', 'authenticated', 'sarah.manager@company.com', crypt('Password123!', gen_salt('bf')), now(), '{"provider":"email","providers":["email"]}', '{"full_name":"Sarah Connor"}', now(), now()),
-    (v_m2_id, '00000000-0000-0000-0000-000000000000', 'authenticated', 'authenticated', 'marcus.manager@company.com', crypt('Password123!', gen_salt('bf')), now(), '{"provider":"email","providers":["email"]}', '{"full_name":"Marcus Wright"}', now(), now()),
-    (v_e1_id, '00000000-0000-0000-0000-000000000000', 'authenticated', 'authenticated', 'alex.employee@company.com', crypt('Password123!', gen_salt('bf')), now(), '{"provider":"email","providers":["email"]}', '{"full_name":"Alex Mercer"}', now(), now()),
-    (v_e2_id, '00000000-0000-0000-0000-000000000000', 'authenticated', 'authenticated', 'emma.employee@company.com', crypt('Password123!', gen_salt('bf')), now(), '{"provider":"email","providers":["email"]}', '{"full_name":"Emma Watson"}', now(), now()),
-    (v_e3_id, '00000000-0000-0000-0000-000000000000', 'authenticated', 'authenticated', 'david.employee@company.com', crypt('Password123!', gen_salt('bf')), now(), '{"provider":"email","providers":["email"]}', '{"full_name":"David Miller"}', now(), now()),
-    (v_e4_id, '00000000-0000-0000-0000-000000000000', 'authenticated', 'authenticated', 'lisa.employee@company.com', crypt('Password123!', gen_salt('bf')), now(), '{"provider":"email","providers":["email"]}', '{"full_name":"Lisa Ray"}', now(), now())
-  ON CONFLICT (id) DO NOTHING;
 
-  -- Insert/update profiles
+  v_pwd_hash TEXT := crypt('Password123!', gen_salt('bf'));
+BEGIN
+  -- 1. Insert or update auth.users with empty strings for all GoTrue token columns
+  -- (GoTrue scans strings and fails with "Database error querying schema" if NULL)
+  INSERT INTO auth.users (
+    instance_id, id, aud, role, email, encrypted_password, email_confirmed_at,
+    raw_app_meta_data, raw_user_meta_data, created_at, updated_at,
+    confirmation_token, recovery_token, email_change, email_change_token_new,
+    email_change_token_current, phone_change, phone_change_token
+  ) VALUES
+    ('00000000-0000-0000-0000-000000000000', v_m1_id, 'authenticated', 'authenticated', 'sarah.manager@company.com', v_pwd_hash, now(), '{"provider":"email","providers":["email"]}', '{"full_name":"Sarah Connor"}', now(), now(), '', '', '', '', '', '', ''),
+    ('00000000-0000-0000-0000-000000000000', v_m2_id, 'authenticated', 'authenticated', 'marcus.manager@company.com', v_pwd_hash, now(), '{"provider":"email","providers":["email"]}', '{"full_name":"Marcus Wright"}', now(), now(), '', '', '', '', '', '', ''),
+    ('00000000-0000-0000-0000-000000000000', v_e1_id, 'authenticated', 'authenticated', 'alex.employee@company.com', v_pwd_hash, now(), '{"provider":"email","providers":["email"]}', '{"full_name":"Alex Mercer"}', now(), now(), '', '', '', '', '', '', ''),
+    ('00000000-0000-0000-0000-000000000000', v_e2_id, 'authenticated', 'authenticated', 'emma.employee@company.com', v_pwd_hash, now(), '{"provider":"email","providers":["email"]}', '{"full_name":"Emma Watson"}', now(), now(), '', '', '', '', '', '', ''),
+    ('00000000-0000-0000-0000-000000000000', v_e3_id, 'authenticated', 'authenticated', 'david.employee@company.com', v_pwd_hash, now(), '{"provider":"email","providers":["email"]}', '{"full_name":"David Miller"}', now(), now(), '', '', '', '', '', '', ''),
+    ('00000000-0000-0000-0000-000000000000', v_e4_id, 'authenticated', 'authenticated', 'lisa.employee@company.com', v_pwd_hash, now(), '{"provider":"email","providers":["email"]}', '{"full_name":"Lisa Ray"}', now(), now(), '', '', '', '', '', '', '')
+  ON CONFLICT (id) DO UPDATE SET
+    encrypted_password = EXCLUDED.encrypted_password,
+    confirmation_token = '',
+    recovery_token = '',
+    email_change = '',
+    email_change_token_new = '',
+    email_change_token_current = '',
+    phone_change = '',
+    phone_change_token = '';
+
+  -- Also ensure any existing rows in auth.users have empty strings (fixes NULL scan error)
+  UPDATE auth.users
+  SET
+    confirmation_token = COALESCE(confirmation_token, ''),
+    recovery_token = COALESCE(recovery_token, ''),
+    email_change = COALESCE(email_change, ''),
+    email_change_token_new = COALESCE(email_change_token_new, ''),
+    email_change_token_current = COALESCE(email_change_token_current, ''),
+    phone_change = COALESCE(phone_change, ''),
+    phone_change_token = COALESCE(phone_change_token, '')
+  WHERE id IN (v_m1_id, v_m2_id, v_e1_id, v_e2_id, v_e3_id, v_e4_id);
+
+  -- 2. Insert matching rows in auth.identities (GoTrue requires this to authenticate email/password)
+  INSERT INTO auth.identities (
+    id, user_id, identity_data, provider, provider_id, last_sign_in_at, created_at, updated_at
+  ) VALUES
+    (v_m1_id, v_m1_id, json_build_object('sub', v_m1_id::text, 'email', 'sarah.manager@company.com')::jsonb, 'email', v_m1_id::text, now(), now(), now()),
+    (v_m2_id, v_m2_id, json_build_object('sub', v_m2_id::text, 'email', 'marcus.manager@company.com')::jsonb, 'email', v_m2_id::text, now(), now(), now()),
+    (v_e1_id, v_e1_id, json_build_object('sub', v_e1_id::text, 'email', 'alex.employee@company.com')::jsonb, 'email', v_e1_id::text, now(), now(), now()),
+    (v_e2_id, v_e2_id, json_build_object('sub', v_e2_id::text, 'email', 'emma.employee@company.com')::jsonb, 'email', v_e2_id::text, now(), now(), now()),
+    (v_e3_id, v_e3_id, json_build_object('sub', v_e3_id::text, 'email', 'david.employee@company.com')::jsonb, 'email', v_e3_id::text, now(), now(), now()),
+    (v_e4_id, v_e4_id, json_build_object('sub', v_e4_id::text, 'email', 'lisa.employee@company.com')::jsonb, 'email', v_e4_id::text, now(), now(), now())
+  ON CONFLICT (provider, provider_id) DO NOTHING;
+
+  -- 3. Insert/update profiles
   INSERT INTO profiles (id, full_name, department, role, manager_id)
   VALUES
     (v_m1_id, 'Sarah Connor', 'Engineering', 'manager', NULL),
@@ -56,8 +92,7 @@ BEGIN
     role = EXCLUDED.role,
     manager_id = EXCLUDED.manager_id;
 
-  -- Disable trigger temporarily while seeding requests to prevent duplicate events
-  -- Insert sample requests
+  -- 4. Insert sample requests
   INSERT INTO requests (id, employee_id, type, title, description, start_date, end_date, status, manager_comment, decided_by, decided_at, created_at)
   VALUES
     -- Alex's pending leave
@@ -74,7 +109,7 @@ BEGIN
     (v_req6, v_e1_id, 'it_support', 'Docker License Request', 'Need Docker desktop license.', NULL, NULL, 'cancelled', NULL, NULL, NULL, now() - interval '5 days')
   ON CONFLICT (id) DO NOTHING;
 
-  -- Ensure request events reflect timeline
+  -- 5. Insert audit event timeline
   INSERT INTO request_events (request_id, actor_id, action, note, created_at)
   VALUES
     (v_req1, v_e1_id, 'created', 'Request submitted', now() - interval '2 days'),
