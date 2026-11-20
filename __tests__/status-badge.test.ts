@@ -18,7 +18,7 @@ describe('Status Badge Configurations', () => {
   it('returns red styling for rejected requests', () => {
     const config = getStatusConfig('rejected');
     expect(config.label).toBe('Rejected');
-    expect(config.text).toBe('#DC2626');
+    expect(config.text).toBe('#BA1A1A');
     expect(config.bg).toBe('#FEE2E2');
   });
 

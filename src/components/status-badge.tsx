@@ -1,6 +1,8 @@
 import React from 'react';
 import { StyleSheet, Text, View } from 'react-native';
+import { Ionicons } from '@expo/vector-icons';
 import { RequestStatus } from '@/types/database.types';
+import { Colors } from '@/constants/theme';
 
 interface StatusBadgeProps {
   status: RequestStatus;
@@ -12,37 +14,42 @@ export function getStatusConfig(status: RequestStatus) {
     case 'pending':
       return {
         label: 'Pending',
-        bg: '#FEF3C7',
+        bg: Colors.warningContainer,
         border: '#FDE68A',
-        text: '#D97706',
+        text: Colors.warning,
+        icon: 'time-outline' as const,
       };
     case 'approved':
       return {
         label: 'Approved',
-        bg: '#D1FAE5',
+        bg: Colors.successContainer,
         border: '#A7F3D0',
-        text: '#059669',
+        text: Colors.success,
+        icon: 'checkmark-circle-outline' as const,
       };
     case 'rejected':
       return {
         label: 'Rejected',
         bg: '#FEE2E2',
         border: '#FECACA',
-        text: '#DC2626',
+        text: Colors.error,
+        icon: 'close-circle-outline' as const,
       };
     case 'cancelled':
       return {
         label: 'Cancelled',
-        bg: '#F1F5F9',
+        bg: Colors.cancelledContainer,
         border: '#E2E8F0',
-        text: '#64748B',
+        text: Colors.cancelled,
+        icon: 'ban-outline' as const,
       };
     default:
       return {
         label: status,
-        bg: '#F1F5F9',
+        bg: Colors.cancelledContainer,
         border: '#E2E8F0',
-        text: '#64748B',
+        text: Colors.cancelled,
+        icon: 'ellipse-outline' as const,
       };
   }
 }
@@ -59,7 +66,12 @@ export const StatusBadge: React.FC<StatusBadgeProps> = ({ status, size = 'md' })
         isSm ? styles.badgeSm : styles.badgeMd,
       ]}
     >
-      <View style={[styles.dot, { backgroundColor: config.text }]} />
+      <Ionicons
+        name={config.icon}
+        size={isSm ? 12 : 14}
+        color={config.text}
+        style={{ marginRight: 4 }}
+      />
       <Text
         style={[
           styles.text,
@@ -89,14 +101,8 @@ const styles = StyleSheet.create({
     paddingHorizontal: 10,
     paddingVertical: 5,
   },
-  dot: {
-    width: 6,
-    height: 6,
-    borderRadius: 3,
-    marginRight: 6,
-  },
   text: {
-    fontWeight: '600',
+    fontWeight: '700',
   },
   textSm: {
     fontSize: 11,

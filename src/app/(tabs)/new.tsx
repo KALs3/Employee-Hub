@@ -17,10 +17,36 @@ import { Ionicons } from '@expo/vector-icons';
 import {
   createRequestSchema,
   CreateRequestFormValues,
-  requestTypeOptions,
 } from '@/lib/validation';
 import { useCreateRequest } from '@/hooks/use-requests';
 import { RequestType } from '@/types/database.types';
+import { Colors, Shadows } from '@/constants/theme';
+
+const CATEGORIES: {
+  value: RequestType;
+  title: string;
+  desc: string;
+  icon: keyof typeof Ionicons.glyphMap;
+}[] = [
+  {
+    value: 'leave',
+    title: 'Leave & PTO',
+    desc: 'Annual vacation, sick leave, or personal time off',
+    icon: 'calendar',
+  },
+  {
+    value: 'equipment',
+    title: 'Work Equipment',
+    desc: 'Laptops, monitors, ergonomic gear, or accessories',
+    icon: 'laptop',
+  },
+  {
+    value: 'it_support',
+    title: 'IT Support & Access',
+    desc: 'VPN credentials, system permissions, license requests',
+    icon: 'hardware-chip',
+  },
+];
 
 export default function NewRequestScreen() {
   const router = useRouter();
@@ -46,13 +72,14 @@ export default function NewRequestScreen() {
   });
 
   const selectedType = watch('type');
+  const watchedTitle = watch('title') || '';
+  const watchedDesc = watch('description') || '';
 
   const onSubmit = async (data: CreateRequestFormValues) => {
     setSubmitError(null);
     try {
       const created = await createMutation.mutateAsync(data);
       reset();
-      // Navigate to the created request's detail page
       router.push(`/request/${created.id}`);
     } catch (err: any) {
       setSubmitError(err.message || 'Failed to submit request. Please try again.');
@@ -67,68 +94,77 @@ export default function NewRequestScreen() {
       <ScrollView
         contentContainerStyle={styles.scrollContent}
         keyboardShouldPersistTaps="handled"
+        showsVerticalScrollIndicator={false}
       >
-        <Text style={styles.headerTitle}>Create a Request</Text>
-        <Text style={styles.headerSubtitle}>
-          Submit an internal request to your direct manager for review
-        </Text>
+        {/* Header */}
+        <View style={styles.header}>
+          <Text style={styles.headerTitle}>Submit a Request</Text>
+          <Text style={styles.headerSubtitle}>
+            Routing directly to your line manager for review and decision
+          </Text>
+        </View>
 
         {submitError ? (
           <View style={styles.errorBanner}>
-            <Ionicons name="alert-circle" size={18} color="#DC2626" style={{ marginRight: 8 }} />
+            <Ionicons name="alert-circle" size={18} color={Colors.error} style={{ marginRight: 8 }} />
             <Text style={styles.errorBannerText}>{submitError}</Text>
           </View>
         ) : null}
 
-        {/* 1. Request Type Selector */}
-        <Text style={styles.sectionLabel}>Request Category</Text>
-        <View style={styles.typeSelectorContainer}>
-          {requestTypeOptions.map((opt) => {
-            const isSelected = selectedType === opt.value;
-            let icon: keyof typeof Ionicons.glyphMap = 'document-outline';
-            if (opt.value === 'leave') icon = 'calendar';
-            if (opt.value === 'equipment') icon = 'laptop';
-            if (opt.value === 'it_support') icon = 'hardware-chip';
-
+        {/* 1. Category Selection Cards */}
+        <Text style={styles.sectionTitle}>SELECT REQUEST TYPE</Text>
+        <View style={styles.categoryContainer}>
+          {CATEGORIES.map((cat) => {
+            const isSelected = selectedType === cat.value;
             return (
               <TouchableOpacity
-                key={opt.value}
-                style={[styles.typeOptionCard, isSelected && styles.typeOptionSelected]}
-                onPress={() => setValue('type', opt.value as RequestType, { shouldValidate: true })}
-                activeOpacity={0.8}
+                key={cat.value}
+                style={[styles.categoryCard, isSelected && styles.categoryCardActive]}
+                onPress={() => setValue('type', cat.value, { shouldValidate: true })}
+                activeOpacity={0.85}
               >
-                <View style={[styles.typeIconBox, isSelected && styles.typeIconBoxSelected]}>
-                  <Ionicons name={icon} size={20} color={isSelected ? '#FFFFFF' : '#475569'} />
+                <View
+                  style={[
+                    styles.categoryIconCircle,
+                    isSelected && styles.categoryIconCircleActive,
+                  ]}
+                >
+                  <Ionicons
+                    name={cat.icon}
+                    size={20}
+                    color={isSelected ? '#FFFFFF' : Colors.primary}
+                  />
                 </View>
-                <View style={styles.typeTextGroup}>
-                  <Text style={[styles.typeLabel, isSelected && styles.typeLabelSelected]}>
-                    {opt.label}
+                <View style={styles.categoryTextCol}>
+                  <Text style={[styles.categoryTitle, isSelected && styles.categoryTitleActive]}>
+                    {cat.title}
                   </Text>
-                  <Text style={styles.typeDescription} numberOfLines={2}>
-                    {opt.description}
-                  </Text>
+                  <Text style={styles.categoryDesc}>{cat.desc}</Text>
                 </View>
+                <Ionicons
+                  name={isSelected ? 'checkmark-circle' : 'ellipse-outline'}
+                  size={20}
+                  color={isSelected ? Colors.secondary : Colors.outlineVariant}
+                />
               </TouchableOpacity>
             );
           })}
         </View>
-        {errors.type?.message ? (
-          <Text style={styles.inlineError}>{errors.type.message}</Text>
-        ) : null}
 
-        {/* 2. Title Field */}
-        <View style={styles.fieldGroup}>
-          <Text style={styles.label}>
-            Request Title <Text style={styles.requiredStar}>*</Text>
-          </Text>
+        {/* 2. Request Title */}
+        <View style={styles.fieldCard}>
+          <View style={styles.fieldHeaderRow}>
+            <Text style={styles.fieldLabel}>Request Title</Text>
+            <Text style={styles.charCount}>{watchedTitle.length}/120</Text>
+          </View>
           <Controller
             control={control}
             name="title"
             render={({ field: { onChange, onBlur, value } }) => (
               <TextInput
                 style={[styles.input, errors.title && styles.inputError]}
-                placeholder="e.g. Annual Vacation, Second Monitor, VPN setup"
-                placeholderTextColor="#94A3B8"
+                placeholder="e.g. Q4 Annual Vacation, Keychron Keyboard"
+                placeholderTextColor={Colors.outline}
                 onBlur={onBlur}
                 onChangeText={onChange}
                 value={value}
@@ -141,15 +177,13 @@ export default function NewRequestScreen() {
           ) : null}
         </View>
 
-        {/* 3. Conditional Date Fields for Leave */}
+        {/* 3. Conditional Dates for Leave */}
         {selectedType === 'leave' ? (
-          <View style={styles.dateSection}>
-            <Text style={styles.label}>
-              Leave Period (YYYY-MM-DD) <Text style={styles.requiredStar}>*</Text>
-            </Text>
+          <View style={styles.fieldCard}>
+            <Text style={styles.fieldLabel}>Leave Period (YYYY-MM-DD)</Text>
             <View style={styles.dateRow}>
               <View style={styles.dateCol}>
-                <Text style={styles.subLabel}>Start Date</Text>
+                <Text style={styles.subDateLabel}>Start Date</Text>
                 <Controller
                   control={control}
                   name="start_date"
@@ -157,7 +191,7 @@ export default function NewRequestScreen() {
                     <TextInput
                       style={[styles.input, errors.start_date && styles.inputError]}
                       placeholder="2026-12-01"
-                      placeholderTextColor="#94A3B8"
+                      placeholderTextColor={Colors.outline}
                       onBlur={onBlur}
                       onChangeText={onChange}
                       value={value}
@@ -171,7 +205,7 @@ export default function NewRequestScreen() {
               </View>
 
               <View style={styles.dateCol}>
-                <Text style={styles.subLabel}>End Date</Text>
+                <Text style={styles.subDateLabel}>End Date</Text>
                 <Controller
                   control={control}
                   name="end_date"
@@ -179,7 +213,7 @@ export default function NewRequestScreen() {
                     <TextInput
                       style={[styles.input, errors.end_date && styles.inputError]}
                       placeholder="2026-12-08"
-                      placeholderTextColor="#94A3B8"
+                      placeholderTextColor={Colors.outline}
                       onBlur={onBlur}
                       onChangeText={onChange}
                       value={value}
@@ -195,17 +229,20 @@ export default function NewRequestScreen() {
           </View>
         ) : null}
 
-        {/* 4. Description Field */}
-        <View style={styles.fieldGroup}>
-          <Text style={styles.label}>Description / Justification (Optional)</Text>
+        {/* 4. Description / Justification */}
+        <View style={styles.fieldCard}>
+          <View style={styles.fieldHeaderRow}>
+            <Text style={styles.fieldLabel}>Details & Justification</Text>
+            <Text style={styles.charCount}>{watchedDesc.length}/1000</Text>
+          </View>
           <Controller
             control={control}
             name="description"
             render={({ field: { onChange, onBlur, value } }) => (
               <TextInput
                 style={[styles.input, styles.textArea]}
-                placeholder="Add context or notes for your manager to review..."
-                placeholderTextColor="#94A3B8"
+                placeholder="Add necessary notes or context for your manager..."
+                placeholderTextColor={Colors.outline}
                 multiline
                 numberOfLines={4}
                 textAlignVertical="top"
@@ -226,14 +263,14 @@ export default function NewRequestScreen() {
           style={[styles.submitButton, createMutation.isPending && styles.submitButtonDisabled]}
           onPress={() => handleSubmit(onSubmit)()}
           disabled={createMutation.isPending}
-          activeOpacity={0.8}
+          activeOpacity={0.85}
         >
           {createMutation.isPending ? (
             <ActivityIndicator color="#FFFFFF" />
           ) : (
             <>
-              <Ionicons name="paper-plane" size={18} color="#FFFFFF" style={{ marginRight: 8 }} />
-              <Text style={styles.submitButtonText}>Submit Request</Text>
+              <Text style={styles.submitButtonText}>Submit Request to Manager</Text>
+              <Ionicons name="arrow-forward" size={18} color="#FFFFFF" />
             </>
           )}
         </TouchableOpacity>
@@ -245,119 +282,131 @@ export default function NewRequestScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#F8FAFC',
+    backgroundColor: Colors.background,
   },
   scrollContent: {
-    padding: 20,
-    paddingBottom: 40,
+    padding: 18,
+    paddingBottom: 50,
+  },
+  header: {
+    marginBottom: 18,
   },
   headerTitle: {
     fontSize: 22,
-    fontWeight: '700',
-    color: '#0F172A',
-    marginBottom: 4,
+    fontWeight: '800',
+    color: Colors.onSurface,
+    letterSpacing: -0.3,
   },
   headerSubtitle: {
-    fontSize: 14,
-    color: '#64748B',
-    marginBottom: 20,
+    fontSize: 13,
+    color: Colors.onSurfaceVariant,
+    marginTop: 4,
   },
   errorBanner: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#FEF2F2',
-    borderWidth: 1,
-    borderColor: '#FECACA',
+    backgroundColor: Colors.errorContainer,
     borderRadius: 8,
     padding: 12,
     marginBottom: 16,
   },
   errorBannerText: {
-    color: '#B91C1C',
+    color: Colors.error,
     fontSize: 13,
+    fontWeight: '500',
     flex: 1,
   },
-  sectionLabel: {
-    fontSize: 14,
-    fontWeight: '600',
-    color: '#334155',
+  sectionTitle: {
+    fontSize: 11,
+    fontWeight: '700',
+    color: Colors.onSurfaceVariant,
+    letterSpacing: 0.8,
     marginBottom: 10,
   },
-  typeSelectorContainer: {
+  categoryContainer: {
     gap: 10,
     marginBottom: 16,
   },
-  typeOptionCard: {
+  categoryCard: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#FFFFFF',
+    backgroundColor: Colors.surface,
+    borderRadius: 14,
+    padding: 14,
     borderWidth: 1.5,
     borderColor: '#E2E8F0',
-    borderRadius: 12,
-    padding: 12,
+    ...Shadows.sm,
   },
-  typeOptionSelected: {
-    borderColor: '#2563EB',
-    backgroundColor: '#EFF6FF',
+  categoryCardActive: {
+    borderColor: Colors.secondary,
+    backgroundColor: '#F8FAFF',
   },
-  typeIconBox: {
+  categoryIconCircle: {
     width: 40,
     height: 40,
     borderRadius: 20,
-    backgroundColor: '#F1F5F9',
+    backgroundColor: Colors.surfaceContainer,
     alignItems: 'center',
     justifyContent: 'center',
     marginRight: 12,
   },
-  typeIconBoxSelected: {
-    backgroundColor: '#2563EB',
+  categoryIconCircleActive: {
+    backgroundColor: Colors.primary,
   },
-  typeTextGroup: {
+  categoryTextCol: {
     flex: 1,
+    paddingRight: 8,
   },
-  typeLabel: {
+  categoryTitle: {
     fontSize: 15,
-    fontWeight: '600',
-    color: '#1E293B',
+    fontWeight: '700',
+    color: Colors.onSurface,
     marginBottom: 2,
   },
-  typeLabelSelected: {
-    color: '#1D4ED8',
+  categoryTitleActive: {
+    color: Colors.primary,
   },
-  typeDescription: {
+  categoryDesc: {
     fontSize: 12,
-    color: '#64748B',
+    color: Colors.onSurfaceVariant,
+    lineHeight: 16,
   },
-  fieldGroup: {
-    marginBottom: 18,
+  fieldCard: {
+    backgroundColor: Colors.surface,
+    borderRadius: 14,
+    padding: 16,
+    borderWidth: 1,
+    borderColor: '#E2E8F0',
+    marginBottom: 14,
+    ...Shadows.sm,
   },
-  label: {
-    fontSize: 14,
-    fontWeight: '600',
-    color: '#334155',
-    marginBottom: 6,
+  fieldHeaderRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 8,
   },
-  subLabel: {
-    fontSize: 12,
-    fontWeight: '500',
-    color: '#64748B',
-    marginBottom: 4,
+  fieldLabel: {
+    fontSize: 13,
+    fontWeight: '700',
+    color: Colors.onSurface,
   },
-  requiredStar: {
-    color: '#DC2626',
+  charCount: {
+    fontSize: 11,
+    color: Colors.outline,
   },
   input: {
-    backgroundColor: '#FFFFFF',
+    backgroundColor: Colors.background,
+    borderRadius: 10,
     borderWidth: 1,
     borderColor: '#CBD5E1',
-    borderRadius: 8,
     paddingHorizontal: 14,
     height: 48,
-    fontSize: 15,
-    color: '#0F172A',
+    fontSize: 14,
+    color: Colors.onSurface,
   },
   inputError: {
-    borderColor: '#EF4444',
+    borderColor: Colors.error,
   },
   textArea: {
     height: 100,
@@ -365,28 +414,35 @@ const styles = StyleSheet.create({
     paddingBottom: 12,
   },
   inlineError: {
-    color: '#DC2626',
+    color: Colors.error,
     fontSize: 12,
     marginTop: 4,
-  },
-  dateSection: {
-    marginBottom: 18,
+    fontWeight: '500',
   },
   dateRow: {
     flexDirection: 'row',
     gap: 12,
+    marginTop: 6,
   },
   dateCol: {
     flex: 1,
   },
+  subDateLabel: {
+    fontSize: 11,
+    fontWeight: '600',
+    color: Colors.onSurfaceVariant,
+    marginBottom: 4,
+  },
   submitButton: {
     flexDirection: 'row',
     height: 52,
-    backgroundColor: '#2563EB',
-    borderRadius: 10,
+    backgroundColor: Colors.primary,
+    borderRadius: 12,
     alignItems: 'center',
     justifyContent: 'center',
-    marginTop: 10,
+    gap: 8,
+    marginTop: 8,
+    ...Shadows.md,
   },
   submitButtonDisabled: {
     opacity: 0.6,
@@ -394,6 +450,6 @@ const styles = StyleSheet.create({
   submitButtonText: {
     color: '#FFFFFF',
     fontSize: 16,
-    fontWeight: '600',
+    fontWeight: '700',
   },
 });
