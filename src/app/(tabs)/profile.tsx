@@ -9,7 +9,6 @@ import {
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useAuth } from '@/hooks/use-auth';
-import { Colors, Shadows } from '@/constants/theme';
 
 export default function ProfileScreen() {
   const { profile, manager, signOut, loading } = useAuth();
@@ -17,45 +16,39 @@ export default function ProfileScreen() {
   if (loading) {
     return (
       <View style={styles.centerContainer}>
-        <ActivityIndicator size="large" color={Colors.primary} />
+        <ActivityIndicator size="large" color="#2563EB" />
       </View>
     );
   }
 
-  const isManager = profile?.role === 'manager';
-
   return (
-    <ScrollView
-      style={styles.container}
-      contentContainerStyle={styles.content}
-      showsVerticalScrollIndicator={false}
-    >
-      {/* User Hero Card */}
+    <ScrollView style={styles.container} contentContainerStyle={styles.content}>
+      {/* User Header Card */}
       <View style={styles.card}>
         <View style={styles.avatar}>
           <Text style={styles.avatarText}>
             {profile?.full_name?.charAt(0).toUpperCase() || 'U'}
           </Text>
         </View>
-        <Text style={styles.name}>{profile?.full_name || 'Corporate User'}</Text>
-        <View style={[styles.roleBadge, isManager ? styles.managerBadge : styles.employeeBadge]}>
-          <Text style={[styles.roleText, isManager ? styles.managerText : styles.employeeText]}>
-            {isManager ? 'TEAM MANAGER' : 'EMPLOYEE'}
+        <Text style={styles.name}>{profile?.full_name || 'User'}</Text>
+        <View style={styles.roleBadge}>
+          <Text style={styles.roleText}>
+            {profile?.role ? profile.role.toUpperCase() : 'EMPLOYEE'}
           </Text>
         </View>
       </View>
 
-      {/* Corporate Position Info Card */}
+      {/* Details Card */}
       <View style={styles.card}>
-        <Text style={styles.sectionTitle}>ORGANIZATION DETAILS</Text>
+        <Text style={styles.sectionTitle}>Employee Information</Text>
 
         <View style={styles.infoRow}>
           <View style={styles.infoIcon}>
-            <Ionicons name="business-outline" size={18} color={Colors.primary} />
+            <Ionicons name="business-outline" size={20} color="#64748B" />
           </View>
           <View style={styles.infoContent}>
             <Text style={styles.infoLabel}>Department</Text>
-            <Text style={styles.infoValue}>{profile?.department || 'Engineering'}</Text>
+            <Text style={styles.infoValue}>{profile?.department || 'Not specified'}</Text>
           </View>
         </View>
 
@@ -63,64 +56,25 @@ export default function ProfileScreen() {
 
         <View style={styles.infoRow}>
           <View style={styles.infoIcon}>
-            <Ionicons name="person-outline" size={18} color={Colors.primary} />
+            <Ionicons name="person-circle-outline" size={20} color="#64748B" />
           </View>
           <View style={styles.infoContent}>
             <Text style={styles.infoLabel}>Reporting Manager</Text>
             <Text style={styles.infoValue}>
-              {manager?.full_name || (isManager ? 'Department Head' : 'Not assigned')}
+              {manager?.full_name || (profile?.role === 'manager' ? 'None (Lead)' : 'Not assigned')}
             </Text>
           </View>
         </View>
       </View>
 
-      {/* Security & System Architecture Card */}
-      <View style={styles.card}>
-        <Text style={styles.sectionTitle}>SECURITY & ARCHITECTURE</Text>
-
-        <View style={styles.infoRow}>
-          <View style={[styles.infoIcon, { backgroundColor: Colors.successContainer }]}>
-            <Ionicons name="shield-checkmark" size={18} color={Colors.success} />
-          </View>
-          <View style={styles.infoContent}>
-            <Text style={styles.infoLabel}>Row Level Security</Text>
-            <Text style={styles.infoValue}>Enforced on Postgres Database</Text>
-          </View>
-        </View>
-
-        <View style={styles.divider} />
-
-        <View style={styles.infoRow}>
-          <View style={[styles.infoIcon, { backgroundColor: Colors.surfaceContainer }]}>
-            <Ionicons name="key-outline" size={18} color={Colors.secondary} />
-          </View>
-          <View style={styles.infoContent}>
-            <Text style={styles.infoLabel}>Session Storage</Text>
-            <Text style={styles.infoValue}>Expo SecureStore (Encrypted)</Text>
-          </View>
-        </View>
-
-        <View style={styles.divider} />
-
-        <View style={styles.infoRow}>
-          <View style={[styles.infoIcon, { backgroundColor: Colors.surfaceContainer }]}>
-            <Ionicons name="git-branch-outline" size={18} color={Colors.primary} />
-          </View>
-          <View style={styles.infoContent}>
-            <Text style={styles.infoLabel}>Application Stack</Text>
-            <Text style={styles.infoValue}>Expo SDK 58 • React Native 0.88</Text>
-          </View>
-        </View>
-      </View>
-
-      {/* Sign Out Button */}
+      {/* Actions */}
       <TouchableOpacity
         style={styles.logoutButton}
         onPress={() => signOut()}
-        activeOpacity={0.85}
+        activeOpacity={0.8}
       >
-        <Ionicons name="log-out-outline" size={20} color={Colors.error} />
-        <Text style={styles.logoutText}>Sign Out from Device</Text>
+        <Ionicons name="log-out-outline" size={20} color="#DC2626" />
+        <Text style={styles.logoutText}>Sign Out</Text>
       </TouchableOpacity>
     </ScrollView>
   );
@@ -129,98 +83,78 @@ export default function ProfileScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: Colors.background,
+    backgroundColor: '#F8FAFC',
   },
   content: {
-    padding: 18,
-    paddingBottom: 50,
+    padding: 20,
   },
   centerContainer: {
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    backgroundColor: Colors.background,
+    backgroundColor: '#F8FAFC',
   },
   card: {
-    backgroundColor: Colors.surface,
+    backgroundColor: '#FFFFFF',
     borderRadius: 16,
     padding: 20,
-    marginBottom: 14,
+    marginBottom: 16,
     borderWidth: 1,
     borderColor: '#E2E8F0',
-    ...Shadows.sm,
+    alignItems: 'center',
   },
   avatar: {
-    width: 68,
-    height: 68,
-    borderRadius: 34,
-    backgroundColor: Colors.primary,
+    width: 72,
+    height: 72,
+    borderRadius: 36,
+    backgroundColor: '#2563EB',
     alignItems: 'center',
     justifyContent: 'center',
     marginBottom: 12,
-    alignSelf: 'center',
-    ...Shadows.sm,
   },
   avatarText: {
-    fontSize: 28,
-    fontWeight: '800',
+    fontSize: 30,
+    fontWeight: '700',
     color: '#FFFFFF',
   },
   name: {
     fontSize: 20,
-    fontWeight: '800',
-    color: Colors.onSurface,
-    textAlign: 'center',
-    marginBottom: 8,
+    fontWeight: '700',
+    color: '#0F172A',
+    marginBottom: 6,
   },
   roleBadge: {
-    alignSelf: 'center',
+    backgroundColor: '#EFF6FF',
     paddingHorizontal: 12,
     paddingVertical: 4,
-    borderRadius: 14,
+    borderRadius: 12,
     borderWidth: 1,
-  },
-  employeeBadge: {
-    backgroundColor: Colors.surfaceContainer,
-    borderColor: '#C7D2FE',
-  },
-  employeeText: {
-    fontSize: 11,
-    fontWeight: '700',
-    color: Colors.primary,
-    letterSpacing: 0.5,
-  },
-  managerBadge: {
-    backgroundColor: Colors.secondaryFixed,
     borderColor: '#BFDBFE',
   },
-  managerText: {
-    fontSize: 11,
-    fontWeight: '700',
-    color: Colors.onSecondaryFixed,
-    letterSpacing: 0.5,
-  },
   roleText: {
-    fontSize: 11,
+    fontSize: 12,
     fontWeight: '700',
+    color: '#1D4ED8',
     letterSpacing: 0.5,
   },
   sectionTitle: {
-    fontSize: 11,
-    fontWeight: '700',
-    color: Colors.onSurfaceVariant,
-    letterSpacing: 0.8,
+    fontSize: 15,
+    fontWeight: '600',
+    color: '#334155',
+    alignSelf: 'flex-start',
     marginBottom: 16,
   },
   infoRow: {
     flexDirection: 'row',
     alignItems: 'center',
+    width: '100%',
+    paddingVertical: 4,
   },
   infoIcon: {
     width: 36,
     height: 36,
     borderRadius: 18,
-    backgroundColor: Colors.surfaceContainer,
+    backgroundColor: '#F1F5F9',
     alignItems: 'center',
     justifyContent: 'center',
     marginRight: 12,
@@ -229,15 +163,14 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   infoLabel: {
-    fontSize: 11,
-    color: Colors.onSurfaceVariant,
-    fontWeight: '500',
+    fontSize: 12,
+    color: '#64748B',
     marginBottom: 2,
   },
   infoValue: {
-    fontSize: 14,
-    fontWeight: '600',
-    color: Colors.onSurface,
+    fontSize: 15,
+    fontWeight: '500',
+    color: '#0F172A',
   },
   divider: {
     height: 1,
@@ -249,17 +182,17 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    backgroundColor: Colors.errorContainer,
+    backgroundColor: '#FEF2F2',
     borderWidth: 1,
     borderColor: '#FECACA',
     borderRadius: 12,
     paddingVertical: 14,
     gap: 8,
-    marginTop: 6,
+    marginTop: 8,
   },
   logoutText: {
     fontSize: 15,
-    fontWeight: '700',
-    color: Colors.error,
+    fontWeight: '600',
+    color: '#DC2626',
   },
 });

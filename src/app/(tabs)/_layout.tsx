@@ -2,7 +2,6 @@ import React from 'react';
 import { Tabs } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { useAuth } from '@/hooks/use-auth';
-import { Colors } from '@/constants/theme';
 
 export default function TabLayout() {
   const { role } = useAuth();
@@ -12,23 +11,18 @@ export default function TabLayout() {
     <Tabs
       screenOptions={{
         headerShown: true,
-        tabBarActiveTintColor: Colors.primary,
-        tabBarInactiveTintColor: Colors.outline,
+        tabBarActiveTintColor: '#2563EB',
+        tabBarInactiveTintColor: '#64748B',
         tabBarStyle: {
-          backgroundColor: Colors.surface,
+          backgroundColor: '#FFFFFF',
           borderTopColor: '#E2E8F0',
         },
-        tabBarLabelStyle: {
-          fontSize: 11,
-          fontWeight: '600',
-        },
         headerStyle: {
-          backgroundColor: Colors.surface,
+          backgroundColor: '#FFFFFF',
         },
         headerTitleStyle: {
-          fontWeight: '700',
-          fontSize: 17,
-          color: Colors.onSurface,
+          fontWeight: '600',
+          color: '#0F172A',
         },
       }}
     >
@@ -78,7 +72,7 @@ export default function TabLayout() {
       <Tabs.Screen
         name="profile"
         options={{
-          title: 'Profile & Settings',
+          title: 'Profile',
           tabBarLabel: 'Profile',
           tabBarIcon: ({ color, size }) => (
             <Ionicons

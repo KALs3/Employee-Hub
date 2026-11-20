@@ -13,38 +13,17 @@ import { usePendingApprovals } from '@/hooks/use-requests';
 import { StatusBadge } from '@/components/status-badge';
 import { LoadingView, EmptyView, ErrorView } from '@/components/feedback-states';
 import { RequestWithDetails } from '@/api/requests';
-import { Colors, Shadows } from '@/constants/theme';
 
-function getTypeConfig(type: string) {
+function getTypeIcon(type: string): keyof typeof Ionicons.glyphMap {
   switch (type) {
     case 'leave':
-      return {
-        label: 'Leave',
-        icon: 'calendar-outline' as const,
-        bg: Colors.primaryFixed,
-        text: Colors.primary,
-      };
+      return 'calendar-outline';
     case 'equipment':
-      return {
-        label: 'Equipment',
-        icon: 'laptop-outline' as const,
-        bg: '#EDE9FE',
-        text: '#6D28D9',
-      };
+      return 'laptop-outline';
     case 'it_support':
-      return {
-        label: 'IT Support',
-        icon: 'hardware-chip-outline' as const,
-        bg: '#FEF3C7',
-        text: '#B45309',
-      };
+      return 'hardware-chip-outline';
     default:
-      return {
-        label: type,
-        icon: 'document-text-outline' as const,
-        bg: Colors.surfaceContainer,
-        text: Colors.onSurfaceVariant,
-      };
+      return 'document-text-outline';
   }
 }
 
@@ -66,13 +45,11 @@ export default function ApprovalsScreen() {
   const { data: approvals, isLoading, isError, error, refetch, isRefetching } = usePendingApprovals();
 
   const renderItem = ({ item }: { item: RequestWithDetails }) => {
-    const typeCfg = getTypeConfig(item.type);
-
     return (
       <TouchableOpacity
         style={styles.requestCard}
         onPress={() => router.push(`/request/${item.id}`)}
-        activeOpacity={0.8}
+        activeOpacity={0.7}
       >
         <View style={styles.cardHeader}>
           <View style={styles.employeeInfo}>
@@ -92,16 +69,9 @@ export default function ApprovalsScreen() {
         <View style={styles.divider} />
 
         <View style={styles.typeRow}>
-          <View style={[styles.typeBadge, { backgroundColor: typeCfg.bg }]}>
-            <Ionicons
-              name={typeCfg.icon}
-              size={13}
-              color={typeCfg.text}
-              style={{ marginRight: 4 }}
-            />
-            <Text style={[styles.typeBadgeText, { color: typeCfg.text }]}>
-              {typeCfg.label}
-            </Text>
+          <View style={styles.typeTag}>
+            <Ionicons name={getTypeIcon(item.type)} size={13} color="#475569" style={{ marginRight: 4 }} />
+            <Text style={styles.typeText}>{item.type.replace('_', ' ').toUpperCase()}</Text>
           </View>
           <Text style={styles.submittedDate}>Submitted {formatDate(item.created_at)}</Text>
         </View>
@@ -117,17 +87,17 @@ export default function ApprovalsScreen() {
         ) : null}
 
         {item.type === 'leave' && item.start_date && item.end_date ? (
-          <View style={styles.datePill}>
-            <Ionicons name="calendar" size={13} color={Colors.secondary} style={{ marginRight: 6 }} />
-            <Text style={styles.datePillText}>
-              {item.start_date} → {item.end_date}
+          <View style={styles.dateRow}>
+            <Ionicons name="time-outline" size={13} color="#1D4ED8" style={{ marginRight: 4 }} />
+            <Text style={styles.dateText}>
+              {item.start_date} to {item.end_date}
             </Text>
           </View>
         ) : null}
 
         <View style={styles.cardActionRow}>
-          <Text style={styles.reviewPrompt}>Review & Decide</Text>
-          <Ionicons name="arrow-forward-circle" size={20} color={Colors.secondary} />
+          <Text style={styles.reviewPrompt}>Tap to Review & Decide</Text>
+          <Ionicons name="arrow-forward-circle" size={20} color="#2563EB" />
         </View>
       </TouchableOpacity>
     );
@@ -142,9 +112,7 @@ export default function ApprovalsScreen() {
       <ErrorView
         title="Could not load approvals"
         message={error?.message || 'Something went wrong loading pending team requests.'}
-        onRetry={() => {
-          refetch();
-        }}
+        onRetry={() => refetch()}
       />
     );
   }
@@ -154,20 +122,17 @@ export default function ApprovalsScreen() {
       <EmptyView
         icon="checkmark-done-circle-outline"
         title="All caught up!"
-        description="There are currently no pending requests from your direct reports awaiting your approval."
+        description="There are no pending requests from your direct reports awaiting your approval."
         actionLabel="Refresh List"
-        onAction={() => {
-          refetch();
-        }}
+        onAction={() => refetch()}
       />
     );
   }
 
   return (
     <View style={styles.container}>
-      {/* Stitch Approvals Header Banner */}
       <View style={styles.headerBanner}>
-        <Ionicons name="shield-checkmark" size={18} color={Colors.secondary} style={{ marginRight: 8 }} />
+        <Ionicons name="information-circle" size={18} color="#2563EB" style={{ marginRight: 6 }} />
         <Text style={styles.bannerText}>
           {approvals.length} request{approvals.length > 1 ? 's' : ''} awaiting your review
         </Text>
@@ -178,15 +143,14 @@ export default function ApprovalsScreen() {
         keyExtractor={(item) => item.id}
         renderItem={renderItem}
         contentContainerStyle={styles.listContent}
-        showsVerticalScrollIndicator={false}
         refreshControl={
           <RefreshControl
             refreshing={isRefetching}
             onRefresh={() => {
               refetch();
             }}
-            colors={[Colors.primary]}
-            tintColor={Colors.primary}
+            colors={['#2563EB']}
+            tintColor="#2563EB"
           />
         }
       />
@@ -197,34 +161,37 @@ export default function ApprovalsScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: Colors.background,
+    backgroundColor: '#F8FAFC',
   },
   headerBanner: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: Colors.surfaceContainer,
-    paddingVertical: 12,
-    paddingHorizontal: 18,
+    backgroundColor: '#EFF6FF',
+    paddingVertical: 10,
+    paddingHorizontal: 16,
     borderBottomWidth: 1,
     borderBottomColor: '#DBEAFE',
   },
   bannerText: {
     fontSize: 13,
-    color: Colors.primary,
-    fontWeight: '700',
+    color: '#1E40AF',
+    fontWeight: '600',
   },
   listContent: {
     padding: 16,
-    paddingBottom: 40,
     gap: 12,
   },
   requestCard: {
-    backgroundColor: Colors.surface,
+    backgroundColor: '#FFFFFF',
     borderRadius: 14,
     padding: 16,
     borderWidth: 1,
     borderColor: '#E2E8F0',
-    ...Shadows.sm,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.04,
+    shadowRadius: 4,
+    elevation: 1,
   },
   cardHeader: {
     flexDirection: 'row',
@@ -236,10 +203,10 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   avatar: {
-    width: 38,
-    height: 38,
-    borderRadius: 19,
-    backgroundColor: Colors.primary,
+    width: 36,
+    height: 36,
+    borderRadius: 18,
+    backgroundColor: '#3B82F6',
     alignItems: 'center',
     justifyContent: 'center',
     marginRight: 10,
@@ -252,11 +219,11 @@ const styles = StyleSheet.create({
   employeeName: {
     fontSize: 15,
     fontWeight: '700',
-    color: Colors.onSurface,
+    color: '#0F172A',
   },
   departmentText: {
     fontSize: 12,
-    color: Colors.onSurfaceVariant,
+    color: '#64748B',
   },
   divider: {
     height: 1,
@@ -269,60 +236,62 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     marginBottom: 8,
   },
-  typeBadge: {
+  typeTag: {
     flexDirection: 'row',
     alignItems: 'center',
+    backgroundColor: '#F1F5F9',
     paddingHorizontal: 8,
     paddingVertical: 3,
     borderRadius: 6,
   },
-  typeBadgeText: {
+  typeText: {
     fontSize: 11,
-    fontWeight: '700',
+    fontWeight: '600',
+    color: '#475569',
   },
   submittedDate: {
     fontSize: 12,
-    color: Colors.outline,
+    color: '#94A3B8',
   },
   title: {
     fontSize: 16,
-    fontWeight: '700',
-    color: Colors.onSurface,
+    fontWeight: '600',
+    color: '#0F172A',
     marginBottom: 6,
   },
   description: {
-    fontSize: 13,
-    color: Colors.onSurfaceVariant,
-    lineHeight: 18,
+    fontSize: 14,
+    color: '#64748B',
+    lineHeight: 19,
     marginBottom: 8,
   },
-  datePill: {
+  dateRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: Colors.surfaceContainerLow,
-    paddingHorizontal: 10,
-    paddingVertical: 5,
+    backgroundColor: '#EFF6FF',
+    paddingHorizontal: 8,
+    paddingVertical: 4,
     borderRadius: 6,
     alignSelf: 'flex-start',
     marginBottom: 8,
   },
-  datePillText: {
+  dateText: {
     fontSize: 12,
-    color: Colors.secondary,
-    fontWeight: '600',
+    color: '#1D4ED8',
+    fontWeight: '500',
   },
   cardActionRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
     marginTop: 6,
-    paddingTop: 10,
+    paddingTop: 8,
     borderTopWidth: 1,
     borderTopColor: '#F8FAFC',
   },
   reviewPrompt: {
     fontSize: 13,
-    fontWeight: '700',
-    color: Colors.secondary,
+    fontWeight: '600',
+    color: '#2563EB',
   },
 });

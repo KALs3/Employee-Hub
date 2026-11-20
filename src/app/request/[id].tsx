@@ -11,14 +11,12 @@ import {
   TextInput,
 } from 'react-native';
 import { useLocalSearchParams } from 'expo-router';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { useRequestDetail, useCancelRequest, useDecideRequest } from '@/hooks/use-requests';
 import { useAuth } from '@/hooks/use-auth';
 import { StatusBadge } from '@/components/status-badge';
 import { LoadingView, ErrorView } from '@/components/feedback-states';
 import { RequestStatus } from '@/types/database.types';
-import { Colors, Shadows } from '@/constants/theme';
 
 function formatDate(dateStr: string) {
   try {
@@ -38,15 +36,15 @@ function formatDate(dateStr: string) {
 function getActionColor(action: string) {
   switch (action) {
     case 'created':
-      return Colors.primary;
+      return '#2563EB';
     case 'approved':
-      return Colors.success;
+      return '#059669';
     case 'rejected':
-      return Colors.error;
+      return '#DC2626';
     case 'cancelled':
-      return Colors.cancelled;
+      return '#64748B';
     default:
-      return Colors.onSurfaceVariant;
+      return '#475569';
   }
 }
 
@@ -67,13 +65,12 @@ function getActionIcon(action: string): keyof typeof Ionicons.glyphMap {
 
 export default function RequestDetailScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
-  const insets = useSafeAreaInsets();
   const { user, role } = useAuth();
   const { data: request, isLoading, isError, error, refetch } = useRequestDetail(id as string);
   const cancelMutation = useCancelRequest();
   const decideMutation = useDecideRequest();
 
-  // Manager Decision Modal
+  // Manager Decision Modal state
   const [modalVisible, setModalVisible] = useState(false);
   const [decisionType, setDecisionType] = useState<RequestStatus>('approved');
   const [comment, setComment] = useState('');
@@ -88,9 +85,7 @@ export default function RequestDetailScreen() {
       <ErrorView
         title="Could not find request"
         message={error?.message || 'This request may have been removed or you do not have permission.'}
-        onRetry={() => {
-          refetch();
-        }}
+        onRetry={() => refetch()}
       />
     );
   }
@@ -102,7 +97,7 @@ export default function RequestDetailScreen() {
   const handleCancel = () => {
     Alert.alert(
       'Cancel Request',
-      'Are you sure you want to cancel this request? This action cannot be reversed.',
+      'Are you sure you want to cancel this pending request? This cannot be undone.',
       [
         { text: 'Keep Request', style: 'cancel' },
         {
@@ -148,77 +143,49 @@ export default function RequestDetailScreen() {
 
   return (
     <View style={styles.container}>
-      <ScrollView
-        contentContainerStyle={[styles.scrollContent, { paddingBottom: insets.bottom + 100 }]}
-        showsVerticalScrollIndicator={false}
-      >
-        {/* Main Details Card */}
+      <ScrollView contentContainerStyle={styles.scrollContent}>
+        {/* Header Card */}
         <View style={styles.card}>
-          <View style={styles.cardHeaderRow}>
-            <View style={styles.typeBadge}>
-              <Text style={styles.typeBadgeText}>
-                {request.type.replace('_', ' ').toUpperCase()}
-              </Text>
+          <View style={styles.statusRow}>
+            <View style={styles.typeTag}>
+              <Text style={styles.typeTagText}>{request.type.replace('_', ' ').toUpperCase()}</Text>
             </View>
             <StatusBadge status={request.status} />
           </View>
 
-          <Text style={styles.requestTitle}>{request.title}</Text>
+          <Text style={styles.title}>{request.title}</Text>
+          <Text style={styles.submittedBy}>
+            Submitted by <Text style={styles.boldText}>{request.employee?.full_name || 'Employee'}</Text>
+            {request.employee?.department ? ` • ${request.employee.department}` : ''}
+          </Text>
 
-          {/* Submitter Info Row */}
-          <View style={styles.submitterRow}>
-            <View style={styles.avatar}>
-              <Text style={styles.avatarText}>
-                {request.employee?.full_name?.charAt(0).toUpperCase() || 'E'}
-              </Text>
+          {request.description ? (
+            <View style={styles.descriptionBox}>
+              <Text style={styles.descriptionLabel}>Details / Notes</Text>
+              <Text style={styles.descriptionText}>{request.description}</Text>
             </View>
-            <View style={styles.submitterMeta}>
-              <Text style={styles.submitterName}>{request.employee?.full_name || 'Employee'}</Text>
-              <Text style={styles.submitterDept}>
-                {request.employee?.department || 'Team Member'} • Submitted {formatDate(request.created_at)}
-              </Text>
-            </View>
-          </View>
+          ) : null}
 
-          {/* Leave Window (if applicable) */}
           {request.type === 'leave' && request.start_date && request.end_date ? (
             <View style={styles.leavePeriodBox}>
-              <Ionicons name="calendar" size={18} color={Colors.secondary} style={{ marginRight: 8 }} />
+              <Ionicons name="calendar-outline" size={18} color="#1D4ED8" style={{ marginRight: 8 }} />
               <View>
-                <Text style={styles.leavePeriodLabel}>Requested Leave Period</Text>
+                <Text style={styles.leavePeriodLabel}>Requested Leave Window</Text>
                 <Text style={styles.leavePeriodValue}>
                   {request.start_date} to {request.end_date}
                 </Text>
               </View>
             </View>
           ) : null}
-
-          {/* Description */}
-          {request.description ? (
-            <View style={styles.descriptionBox}>
-              <Text style={styles.descriptionLabel}>Justification / Notes</Text>
-              <Text style={styles.descriptionText}>{request.description}</Text>
-            </View>
-          ) : null}
         </View>
 
-        {/* Manager Decision Feedback (if decided) */}
+        {/* Manager Decision & Comment (if already decided) */}
         {request.status !== 'pending' && request.manager_comment ? (
           <View style={[styles.card, styles.decisionCard]}>
-            <View style={styles.decisionHeader}>
-              <Ionicons
-                name={request.status === 'approved' ? 'checkmark-circle' : 'close-circle'}
-                size={20}
-                color={request.status === 'approved' ? Colors.success : Colors.error}
-                style={{ marginRight: 6 }}
-              />
-              <Text style={styles.decisionTitle}>
-                Manager Feedback ({request.status.toUpperCase()})
-              </Text>
-            </View>
-            <Text style={styles.decisionComment}>{`"${request.manager_comment}"`}</Text>
+            <Text style={styles.cardSectionTitle}>Manager Feedback</Text>
+            <Text style={styles.commentText}>{request.manager_comment}</Text>
             {request.decider ? (
-              <Text style={styles.deciderName}>
+              <Text style={styles.deciderText}>
                 Decided by {request.decider.full_name}
                 {request.decided_at ? ` on ${formatDate(request.decided_at)}` : ''}
               </Text>
@@ -226,53 +193,54 @@ export default function RequestDetailScreen() {
           </View>
         ) : null}
 
-        {/* Visual Activity Timeline */}
+        {/* Event Timeline */}
         <View style={styles.card}>
-          <Text style={styles.sectionTitle}>ACTIVITY & AUDIT TIMELINE</Text>
+          <Text style={styles.cardSectionTitle}>Activity Timeline</Text>
           {request.events && request.events.length > 0 ? (
             <View style={styles.timelineList}>
               {request.events.map((event, idx) => {
                 const isLast = idx === (request.events?.length ?? 0) - 1;
-                const nodeColor = getActionColor(event.action);
+                const iconColor = getActionColor(event.action);
                 return (
                   <View key={event.id} style={styles.timelineItem}>
                     <View style={styles.timelineLeft}>
-                      <View style={[styles.timelineNode, { backgroundColor: nodeColor }]}>
-                        <Ionicons name={getActionIcon(event.action)} size={12} color="#FFFFFF" />
+                      <View style={[styles.timelineIconWrapper, { backgroundColor: iconColor }]}>
+                        <Ionicons name={getActionIcon(event.action)} size={14} color="#FFFFFF" />
                       </View>
-                      {!isLast ? <View style={styles.timelineConnector} /> : null}
+                      {!isLast ? <View style={styles.timelineLine} /> : null}
                     </View>
                     <View style={styles.timelineRight}>
-                      <Text style={styles.timelineActionTitle}>
+                      <Text style={styles.timelineAction}>
                         Request {event.action.toUpperCase()}
                       </Text>
                       {event.note ? <Text style={styles.timelineNote}>{event.note}</Text> : null}
-                      <Text style={styles.timelineTime}>{formatDate(event.created_at)}</Text>
+                      <Text style={styles.timelineDate}>{formatDate(event.created_at)}</Text>
                     </View>
                   </View>
                 );
               })}
             </View>
           ) : (
-            <Text style={styles.emptyTimelineText}>No timeline history recorded.</Text>
+            <Text style={styles.emptyTimelineText}>No timeline events recorded.</Text>
           )}
         </View>
       </ScrollView>
 
       {/* Floating Bottom Action Bars */}
+      {/* 1. Employee Cancel Button (if pending and owner) */}
       {isOwner && isPending ? (
-        <View style={[styles.floatingBar, { paddingBottom: Math.max(insets.bottom, 16) }]}>
+        <View style={styles.bottomBar}>
           <TouchableOpacity
             style={styles.cancelButton}
             onPress={handleCancel}
             disabled={cancelMutation.isPending}
-            activeOpacity={0.85}
+            activeOpacity={0.8}
           >
             {cancelMutation.isPending ? (
-              <ActivityIndicator color={Colors.error} />
+              <ActivityIndicator color="#DC2626" />
             ) : (
               <>
-                <Ionicons name="close-circle-outline" size={18} color={Colors.error} style={{ marginRight: 6 }} />
+                <Ionicons name="close-circle-outline" size={18} color="#DC2626" style={{ marginRight: 6 }} />
                 <Text style={styles.cancelButtonText}>Cancel This Request</Text>
               </>
             )}
@@ -280,20 +248,21 @@ export default function RequestDetailScreen() {
         </View>
       ) : null}
 
+      {/* 2. Manager Decision Bar (if pending and manager) */}
       {isManager && isPending ? (
-        <View style={[styles.floatingBarRow, { paddingBottom: Math.max(insets.bottom, 16) }]}>
+        <View style={styles.bottomBarRow}>
           <TouchableOpacity
-            style={[styles.actionBtn, styles.rejectBtn]}
+            style={[styles.decisionActionBtn, styles.rejectBtn]}
             onPress={() => openDecisionModal('rejected')}
-            activeOpacity={0.85}
+            activeOpacity={0.8}
           >
-            <Ionicons name="close" size={18} color={Colors.error} style={{ marginRight: 4 }} />
+            <Ionicons name="close" size={18} color="#DC2626" style={{ marginRight: 4 }} />
             <Text style={styles.rejectBtnText}>Reject</Text>
           </TouchableOpacity>
           <TouchableOpacity
-            style={[styles.actionBtn, styles.approveBtn]}
+            style={[styles.decisionActionBtn, styles.approveBtn]}
             onPress={() => openDecisionModal('approved')}
-            activeOpacity={0.85}
+            activeOpacity={0.8}
           >
             <Ionicons name="checkmark" size={18} color="#FFFFFF" style={{ marginRight: 4 }} />
             <Text style={styles.approveBtnText}>Approve</Text>
@@ -310,13 +279,12 @@ export default function RequestDetailScreen() {
             </Text>
             <Text style={styles.modalSubtitle}>
               {decisionType === 'approved'
-                ? 'Optionally add a note or instructions for the employee.'
-                : 'A comment explaining the rejection reason is strictly required.'}
+                ? 'Optionally add a note for the employee.'
+                : 'A comment explaining the rejection is required.'}
             </Text>
 
             {decisionError ? (
               <View style={styles.modalErrorBox}>
-                <Ionicons name="alert-circle" size={14} color={Colors.error} style={{ marginRight: 4 }} />
                 <Text style={styles.modalErrorText}>{decisionError}</Text>
               </View>
             ) : null}
@@ -326,9 +294,9 @@ export default function RequestDetailScreen() {
               placeholder={
                 decisionType === 'approved'
                   ? 'e.g. Approved, enjoy your leave!'
-                  : 'e.g. Current quarterly budget has been allocated...'
+                  : 'e.g. Outside current quarter budget...'
               }
-              placeholderTextColor={Colors.outline}
+              placeholderTextColor="#94A3B8"
               multiline
               numberOfLines={3}
               textAlignVertical="top"
@@ -371,150 +339,112 @@ export default function RequestDetailScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: Colors.background,
+    backgroundColor: '#F8FAFC',
   },
   scrollContent: {
     padding: 16,
-    paddingBottom: 110,
+    paddingBottom: 100,
   },
   card: {
-    backgroundColor: Colors.surface,
+    backgroundColor: '#FFFFFF',
     borderRadius: 16,
     padding: 18,
     borderWidth: 1,
     borderColor: '#E2E8F0',
     marginBottom: 14,
-    ...Shadows.sm,
   },
-  cardHeaderRow: {
+  decisionCard: {
+    backgroundColor: '#F8FAFC',
+    borderColor: '#CBD5E1',
+  },
+  statusRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    marginBottom: 10,
+    marginBottom: 12,
   },
-  typeBadge: {
-    backgroundColor: Colors.surfaceContainer,
+  typeTag: {
+    backgroundColor: '#F1F5F9',
     paddingHorizontal: 8,
     paddingVertical: 4,
     borderRadius: 6,
   },
-  typeBadgeText: {
+  typeTagText: {
     fontSize: 11,
     fontWeight: '700',
-    color: Colors.primary,
+    color: '#475569',
   },
-  requestTitle: {
+  title: {
     fontSize: 20,
-    fontWeight: '800',
-    color: Colors.onSurface,
-    marginBottom: 12,
-  },
-  submitterRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    paddingVertical: 8,
-    borderTopWidth: 1,
-    borderTopColor: '#F1F5F9',
-    marginBottom: 8,
-  },
-  avatar: {
-    width: 36,
-    height: 36,
-    borderRadius: 18,
-    backgroundColor: Colors.primary,
-    alignItems: 'center',
-    justifyContent: 'center',
-    marginRight: 10,
-  },
-  avatarText: {
-    color: '#FFFFFF',
     fontWeight: '700',
-    fontSize: 14,
+    color: '#0F172A',
+    marginBottom: 6,
   },
-  submitterMeta: {
-    flex: 1,
-  },
-  submitterName: {
-    fontSize: 14,
-    fontWeight: '700',
-    color: Colors.onSurface,
-  },
-  submitterDept: {
-    fontSize: 12,
-    color: Colors.onSurfaceVariant,
-  },
-  leavePeriodBox: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: Colors.surfaceContainerLow,
-    borderRadius: 8,
-    padding: 12,
-    marginVertical: 6,
-    borderWidth: 1,
-    borderColor: Colors.secondaryFixed,
-  },
-  leavePeriodLabel: {
-    fontSize: 11,
-    color: Colors.primary,
-    fontWeight: '600',
-  },
-  leavePeriodValue: {
+  submittedBy: {
     fontSize: 13,
-    color: Colors.secondary,
-    fontWeight: '700',
-    marginTop: 2,
+    color: '#64748B',
+    marginBottom: 14,
+  },
+  boldText: {
+    fontWeight: '600',
+    color: '#334155',
   },
   descriptionBox: {
-    backgroundColor: Colors.background,
+    backgroundColor: '#F8FAFC',
     borderRadius: 8,
     padding: 12,
     borderWidth: 1,
     borderColor: '#E2E8F0',
-    marginTop: 8,
+    marginTop: 6,
   },
   descriptionLabel: {
-    fontSize: 11,
-    fontWeight: '700',
-    color: Colors.onSurfaceVariant,
+    fontSize: 12,
+    fontWeight: '600',
+    color: '#64748B',
     marginBottom: 4,
-    textTransform: 'uppercase',
   },
   descriptionText: {
-    fontSize: 13,
-    color: Colors.onSurface,
-    lineHeight: 19,
+    fontSize: 14,
+    color: '#334155',
+    lineHeight: 20,
   },
-  decisionCard: {
-    backgroundColor: '#F8FAFF',
-    borderColor: Colors.secondaryFixed,
-  },
-  decisionHeader: {
+  leavePeriodBox: {
     flexDirection: 'row',
     alignItems: 'center',
+    backgroundColor: '#EFF6FF',
+    borderRadius: 8,
+    padding: 12,
+    marginTop: 12,
+    borderWidth: 1,
+    borderColor: '#BFDBFE',
+  },
+  leavePeriodLabel: {
+    fontSize: 11,
+    color: '#1E40AF',
+    fontWeight: '600',
+  },
+  leavePeriodValue: {
+    fontSize: 14,
+    color: '#1D4ED8',
+    fontWeight: '600',
+    marginTop: 2,
+  },
+  cardSectionTitle: {
+    fontSize: 15,
+    fontWeight: '700',
+    color: '#0F172A',
+    marginBottom: 12,
+  },
+  commentText: {
+    fontSize: 14,
+    color: '#334155',
+    lineHeight: 20,
     marginBottom: 8,
   },
-  decisionTitle: {
-    fontSize: 13,
-    fontWeight: '700',
-    color: Colors.onSurface,
-  },
-  decisionComment: {
-    fontSize: 14,
-    color: Colors.onSurface,
-    fontStyle: 'italic',
-    lineHeight: 20,
-    marginBottom: 6,
-  },
-  deciderName: {
+  deciderText: {
     fontSize: 12,
-    color: Colors.outline,
-  },
-  sectionTitle: {
-    fontSize: 11,
-    fontWeight: '700',
-    color: Colors.onSurfaceVariant,
-    letterSpacing: 0.8,
-    marginBottom: 14,
+    color: '#64748B',
+    fontStyle: 'italic',
   },
   timelineList: {
     paddingLeft: 4,
@@ -524,16 +454,16 @@ const styles = StyleSheet.create({
   },
   timelineLeft: {
     alignItems: 'center',
-    width: 24,
+    width: 28,
   },
-  timelineNode: {
-    width: 22,
-    height: 22,
-    borderRadius: 11,
+  timelineIconWrapper: {
+    width: 24,
+    height: 24,
+    borderRadius: 12,
     alignItems: 'center',
     justifyContent: 'center',
   },
-  timelineConnector: {
+  timelineLine: {
     width: 2,
     flex: 1,
     backgroundColor: '#E2E8F0',
@@ -542,57 +472,55 @@ const styles = StyleSheet.create({
   timelineRight: {
     flex: 1,
     paddingLeft: 12,
-    paddingBottom: 18,
+    paddingBottom: 20,
   },
-  timelineActionTitle: {
+  timelineAction: {
     fontSize: 13,
     fontWeight: '700',
-    color: Colors.onSurface,
+    color: '#0F172A',
   },
   timelineNote: {
-    fontSize: 12,
-    color: Colors.onSurfaceVariant,
+    fontSize: 13,
+    color: '#475569',
     marginTop: 2,
   },
-  timelineTime: {
+  timelineDate: {
     fontSize: 11,
-    color: Colors.outline,
-    marginTop: 3,
+    color: '#94A3B8',
+    marginTop: 4,
   },
   emptyTimelineText: {
-    fontSize: 12,
-    color: Colors.outline,
+    fontSize: 13,
+    color: '#94A3B8',
     fontStyle: 'italic',
   },
-  floatingBar: {
+  bottomBar: {
     position: 'absolute',
     bottom: 0,
     left: 0,
     right: 0,
-    backgroundColor: Colors.surface,
+    backgroundColor: '#FFFFFF',
     borderTopWidth: 1,
     borderTopColor: '#E2E8F0',
     padding: 16,
-    ...Shadows.md,
   },
-  floatingBarRow: {
+  bottomBarRow: {
     position: 'absolute',
     bottom: 0,
     left: 0,
     right: 0,
-    backgroundColor: Colors.surface,
+    backgroundColor: '#FFFFFF',
     borderTopWidth: 1,
     borderTopColor: '#E2E8F0',
     padding: 16,
     flexDirection: 'row',
     gap: 12,
-    ...Shadows.md,
   },
   cancelButton: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    backgroundColor: Colors.errorContainer,
+    backgroundColor: '#FEF2F2',
     borderWidth: 1,
     borderColor: '#FECACA',
     borderRadius: 10,
@@ -600,10 +528,10 @@ const styles = StyleSheet.create({
   },
   cancelButtonText: {
     fontSize: 15,
-    fontWeight: '700',
-    color: Colors.error,
+    fontWeight: '600',
+    color: '#DC2626',
   },
-  actionBtn: {
+  decisionActionBtn: {
     flex: 1,
     flexDirection: 'row',
     alignItems: 'center',
@@ -612,21 +540,21 @@ const styles = StyleSheet.create({
     paddingVertical: 14,
   },
   rejectBtn: {
-    backgroundColor: Colors.errorContainer,
+    backgroundColor: '#FEF2F2',
     borderWidth: 1,
     borderColor: '#FECACA',
   },
   rejectBtnText: {
-    color: Colors.error,
-    fontWeight: '700',
+    color: '#DC2626',
+    fontWeight: '600',
     fontSize: 15,
   },
   approveBtn: {
-    backgroundColor: Colors.success,
+    backgroundColor: '#059669',
   },
   approveBtnText: {
     color: '#FFFFFF',
-    fontWeight: '700',
+    fontWeight: '600',
     fontSize: 15,
   },
   modalOverlay: {
@@ -635,7 +563,7 @@ const styles = StyleSheet.create({
     justifyContent: 'flex-end',
   },
   modalContent: {
-    backgroundColor: Colors.surface,
+    backgroundColor: '#FFFFFF',
     borderTopLeftRadius: 20,
     borderTopRightRadius: 20,
     padding: 24,
@@ -643,37 +571,36 @@ const styles = StyleSheet.create({
   },
   modalTitle: {
     fontSize: 18,
-    fontWeight: '800',
-    color: Colors.onSurface,
+    fontWeight: '700',
+    color: '#0F172A',
     marginBottom: 4,
   },
   modalSubtitle: {
     fontSize: 13,
-    color: Colors.onSurfaceVariant,
+    color: '#64748B',
     marginBottom: 16,
   },
   modalErrorBox: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: Colors.errorContainer,
+    backgroundColor: '#FEF2F2',
+    borderColor: '#FECACA',
+    borderWidth: 1,
     borderRadius: 8,
     padding: 10,
     marginBottom: 12,
   },
   modalErrorText: {
-    color: Colors.error,
+    color: '#DC2626',
     fontSize: 12,
-    fontWeight: '500',
   },
   modalInput: {
-    backgroundColor: Colors.background,
+    backgroundColor: '#F8FAFC',
     borderWidth: 1,
     borderColor: '#CBD5E1',
     borderRadius: 8,
     padding: 12,
     height: 80,
     fontSize: 14,
-    color: Colors.onSurface,
+    color: '#0F172A',
     marginBottom: 20,
   },
   modalButtonsRow: {
@@ -684,11 +611,11 @@ const styles = StyleSheet.create({
     flex: 1,
     paddingVertical: 12,
     borderRadius: 8,
-    backgroundColor: Colors.surfaceContainer,
+    backgroundColor: '#F1F5F9',
     alignItems: 'center',
   },
   modalCancelText: {
-    color: Colors.onSurfaceVariant,
+    color: '#475569',
     fontWeight: '600',
   },
   modalConfirmBtn: {
@@ -699,13 +626,13 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   approveModalBg: {
-    backgroundColor: Colors.success,
+    backgroundColor: '#059669',
   },
   rejectModalBg: {
-    backgroundColor: Colors.error,
+    backgroundColor: '#DC2626',
   },
   modalConfirmText: {
     color: '#FFFFFF',
-    fontWeight: '700',
+    fontWeight: '600',
   },
 });
