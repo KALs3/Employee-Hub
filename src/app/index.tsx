@@ -1,29 +1,27 @@
-import { StyleSheet, Text, View } from 'react-native';
+import React from 'react';
+import { Redirect } from 'expo-router';
+import { ActivityIndicator, View, StyleSheet } from 'react-native';
+import { useAuth } from '@/hooks/use-auth';
 
-export default function HomeScreen() {
-  return (
-    <View style={styles.container}>
-      <Text style={styles.title}>Employee Hub</Text>
-      <Text style={styles.subtitle}>Welcome to Employee Hub</Text>
-    </View>
-  );
+export default function Index() {
+  const { user, loading } = useAuth();
+
+  if (loading) {
+    return (
+      <View style={styles.container}>
+        <ActivityIndicator size="large" color="#2563EB" />
+      </View>
+    );
+  }
+
+  return user ? <Redirect href="/(tabs)" /> : <Redirect href="/(auth)/login" />;
 }
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    alignItems: 'center',
     justifyContent: 'center',
-    padding: 20,
-    backgroundColor: '#fff',
-  },
-  title: {
-    fontSize: 24,
-    fontWeight: 'bold',
-    marginBottom: 8,
-  },
-  subtitle: {
-    fontSize: 16,
-    color: '#666',
+    alignItems: 'center',
+    backgroundColor: '#F8FAFC',
   },
 });
