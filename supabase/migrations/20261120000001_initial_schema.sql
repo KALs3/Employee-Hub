@@ -124,23 +124,52 @@ CREATE TRIGGER trg_check_profile_update
 -- Row Level Security (RLS)
 -- ====================================================================
 
+-- ====================================================================
+-- Row Level Security (RLS) Helper Functions (SECURITY DEFINER)
+-- Bypasses RLS to prevent PostgreSQL infinite recursion loops
+-- ====================================================================
+
+CREATE OR REPLACE FUNCTION get_my_manager_id()
+RETURNS UUID
+LANGUAGE sql
+STABLE
+SECURITY DEFINER
+SET search_path = public
+AS $$
+  SELECT manager_id FROM public.profiles WHERE id = auth.uid();
+$$;
+
+CREATE OR REPLACE FUNCTION is_direct_report(emp_id UUID)
+RETURNS BOOLEAN
+LANGUAGE sql
+STABLE
+SECURITY DEFINER
+SET search_path = public
+AS $$
+  SELECT EXISTS (
+    SELECT 1 FROM public.profiles WHERE id = emp_id AND manager_id = auth.uid()
+  );
+$$;
+
 ALTER TABLE profiles ENABLE ROW LEVEL SECURITY;
 ALTER TABLE requests ENABLE ROW LEVEL SECURITY;
 ALTER TABLE request_events ENABLE ROW LEVEL SECURITY;
 
 -- ---------------- profiles policies ----------------
 -- User can read own profile, their manager's profile, or their direct reports' profiles
+DROP POLICY IF EXISTS "profiles_select_policy" ON profiles;
 CREATE POLICY "profiles_select_policy"
   ON profiles
   FOR SELECT
   TO authenticated
   USING (
     id = auth.uid()
-    OR id = (SELECT manager_id FROM profiles WHERE id = auth.uid())
+    OR id = get_my_manager_id()
     OR manager_id = auth.uid()
   );
 
 -- Users can update only their own profile (role/manager_id protected by trigger)
+DROP POLICY IF EXISTS "profiles_update_own" ON profiles;
 CREATE POLICY "profiles_update_own"
   ON profiles
   FOR UPDATE
@@ -150,18 +179,18 @@ CREATE POLICY "profiles_update_own"
 
 -- ---------------- requests policies ----------------
 -- Employee can read own requests; Manager can read requests of direct reports
+DROP POLICY IF EXISTS "requests_select_policy" ON requests;
 CREATE POLICY "requests_select_policy"
   ON requests
   FOR SELECT
   TO authenticated
   USING (
     employee_id = auth.uid()
-    OR employee_id IN (
-      SELECT p.id FROM profiles p WHERE p.manager_id = auth.uid()
-    )
+    OR is_direct_report(employee_id)
   );
 
 -- Employee can only insert own requests with status = 'pending'
+DROP POLICY IF EXISTS "requests_insert_policy" ON requests;
 CREATE POLICY "requests_insert_policy"
   ON requests
   FOR INSERT
@@ -172,6 +201,7 @@ CREATE POLICY "requests_insert_policy"
   );
 
 -- Employee can cancel only their own pending requests
+DROP POLICY IF EXISTS "requests_employee_cancel" ON requests;
 CREATE POLICY "requests_employee_cancel"
   ON requests
   FOR UPDATE
@@ -187,6 +217,7 @@ CREATE POLICY "requests_employee_cancel"
 
 -- ---------------- request_events policies ----------------
 -- Readable if the user can read the parent request
+DROP POLICY IF EXISTS "request_events_select_policy" ON request_events;
 CREATE POLICY "request_events_select_policy"
   ON request_events
   FOR SELECT
@@ -197,9 +228,7 @@ CREATE POLICY "request_events_select_policy"
       WHERE r.id = request_events.request_id
         AND (
           r.employee_id = auth.uid()
-          OR r.employee_id IN (
-            SELECT p.id FROM profiles p WHERE p.manager_id = auth.uid()
-          )
+          OR is_direct_report(r.employee_id)
         )
     )
   );
