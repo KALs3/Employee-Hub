@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+
+<html lang="en"><head><meta charset="utf-8"/><meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" name="viewport"/><meta content="mobile_stack" name="shell-type"/><link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/><link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/><script src="https://cdn.tailwindcss.com"></script><script id="tailwind-config">tailwind.config = { darkMode: "class", theme: { extend: { "colors": { "on-tertiary-fixed": "#25005a", "tertiary-fixed-dim": "#d2bbff", "background": "#faf8ff", "secondary": "#0051d5", "on-primary-fixed": "#00164e", "primary-container": "#1e3a8a", "primary-fixed": "#dce1ff", "on-secondary-fixed": "#00174b", "inverse-primary": "#b6c4ff", "tertiary": "#37007e", "on-secondary": "#ffffff", "surface-container-high": "#e2e7ff", "on-error-container": "#93000a", "outline-variant": "#c5c5d3", "on-tertiary": "#ffffff", "on-tertiary-container": "#bc9bff", "outline": "#757682", "on-surface": "#131b2e", "inverse-surface": "#283044", "on-primary": "#ffffff", "inverse-on-surface": "#eef0ff", "surface-container-low": "#f2f3ff", "primary": "#00236f", "on-primary-fixed-variant": "#264191", "surface-dim": "#d2d9f4", "secondary-fixed-dim": "#b4c5ff", "on-tertiary-fixed-variant": "#5a00c6", "on-secondary-container": "#fefcff", "surface": "#faf8ff", "on-error": "#ffffff", "surface-variant": "#dae2fd", "on-secondary-fixed-variant": "#003ea8", "surface-bright": "#faf8ff", "on-primary-container": "#90a8ff", "surface-container-highest": "#dae2fd", "surface-tint": "#4059aa", "surface-container": "#eaedff", "on-background": "#131b2e", "tertiary-container": "#5200b5", "tertiary-fixed": "#eaddff", "error-container": "#ffdad6", "secondary-fixed": "#dbe1ff", "error": "#ba1a1a", "surface-container-lowest": "#ffffff", "primary-fixed-dim": "#b6c4ff", "secondary-container": "#316bf3", "on-surface-variant": "#444651" }, "borderRadius": { "DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "0.75rem", "full": "9999px" }, "spacing": { "gutter": "1rem", "space-xl": "2rem", "space-md": "1rem", "space-sm": "0.5rem", "space-xs": "0.25rem", "space-lg": "1.5rem", "margin": "1rem", "margin-tablet": "1.5rem" }, "fontFamily": { "body-md": ["Inter"], "label-lg": ["Inter"], "headline-md": ["Inter"], "label-sm": ["Inter"], "headline-lg": ["Inter"], "body-lg": ["Inter"], "title-md": ["Inter"], "display-lg": ["Inter"], "code-sm": ["Inter"], "label-md": ["Inter"], "body-sm": ["Inter"], "headline-sm": ["Inter"] }, "fontSize": { "body-md": ["14px", {"lineHeight": "20px", "letterSpacing": "0em", "fontWeight": "400"}], "label-lg": ["14px", {"lineHeight": "18px", "letterSpacing": "0.01em", "fontWeight": "600"}], "headline-md": ["22px", {"lineHeight": "28px", "letterSpacing": "-0.01em", "fontWeight": "600"}], "label-sm": ["11px", {"lineHeight": "14px", "letterSpacing": "0.03em", "fontWeight": "600"}], "headline-lg": ["28px", {"lineHeight": "34px", "letterSpacing": "-0.015em", "fontWeight": "700"}], "body-lg": ["16px", {"lineHeight": "24px", "letterSpacing": "0em", "fontWeight": "400"}], "title-md": ["16px", {"lineHeight": "22px", "letterSpacing": "0em", "fontWeight": "600"}], "display-lg": ["34px", {"lineHeight": "40px", "letterSpacing": "-0.02em", "fontWeight": "700"}], "code-sm": ["12px", {"lineHeight": "16px", "letterSpacing": "0.02em", "fontWeight": "500"}], "label-md": ["12px", {"lineHeight": "16px", "letterSpacing": "0.02em", "fontWeight": "600"}], "body-sm": ["13px", {"lineHeight": "18px", "letterSpacing": "0.01em", "fontWeight": "400"}], "headline-sm": ["18px", {"lineHeight": "24px", "letterSpacing": "-0.005em", "fontWeight": "600"}] } } } };</script><style>@layer base{html,body{width:100%;margin:0;padding:0;min-height:100%;}body{overscroll-behavior-y:none;font-family:'Inter',sans-serif;}.pb-safe{padding-bottom:env(safe-area-inset-bottom,0px);}.pt-safe{padding-top:env(safe-area-inset-top,0px);}}::-webkit-scrollbar{display:none;}</style><style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head><body class="bg-background text-on-surface flex flex-col min-h-screen"><header class="fixed top-0 w-full z-50 bg-surface/85 backdrop-blur-xl shadow-[0_1px_8px_rgba(0,0,0,0.04)] pt-safe"><div class="px-gutter pt-space-xs pb-1 flex items-center justify-between font-label-md text-label-md text-on-surface"><span class="font-semibold tracking-tight">9:41</span><div class="flex items-center gap-1.5 text-on-surface"><span class="material-symbols-outlined text-[16px]">signal_cellular_alt</span><span class="material-symbols-outlined text-[16px]">wifi</span><span class="material-symbols-outlined text-[18px]">battery_full</span></div></div><div class="h-16 px-gutter flex items-center justify-between"><div class="flex items-center gap-space-sm"><button aria-label="Go Back" class="w-11 h-11 -ml-2 flex items-center justify-center rounded-full text-on-surface hover:bg-surface-container active:scale-95 transition-all" onclick="history.back()" type="button"><span class="material-symbols-outlined text-[24px]">arrow_back</span></button><img alt="Employee Hub App Icon" class="h-7 w-auto object-contain" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCvyz8hkCyyIyMWJpr53a_dkzY8dm487RFvon1S64h_4pGqo-XyZuQStxL3GQ9RP4itFpHKl9WwQqJVV1_cCyxa5KXsGxGbQOCwMCo6LN5HnCnOyWOGrnISdfECal12Tl6drsuGnwHQWDSikODXQOs4xBF9AMoPGCzhqikEa7SwpMlt1zK2JXqSLrIB_AX4Vs5uuPkffd8K-rQjlhl9golbQXNF5KqW440wVKxP2Hk"/><h1 class="font-title-md text-title-md text-on-surface leading-tight">New Request</h1></div><div class="w-11 h-11 flex items-center justify-center"><img alt="Profile" class="w-8 h-8 rounded-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuA3-bZSs6R-PpimxYWQyKBZ2K9lAdySrPVlOPcIaMmskYgG7oI1YUSkBJ65UJB-_atJ6zj-S_KpzT0KdYDnbrqexekjk0UIc-jSP54dQLBkIFt_EtU6bRZqnh6bp-g_QQSKwRKwxgWCSx9p4BwQljSF8GLhZt9fLee0QUdC_cIv7G6vHZw0rJc2cPs-6HNioRIYzEkZp549dxrU87IKlLqfjkN9Mtoay8LmmQYqjeI"/></div></div></header><main class="flex-1 flex flex-col relative w-full pt-24 pb-safe px-gutter bg-background"><div class="flex flex-col w-full pb-8">
+<div class="mb-5">
+<h2 class="font-headline-md text-headline-md text-on-surface">Create New Request</h2>
+<div class="flex items-center gap-1.5 mt-1 text-on-surface-variant font-body-sm text-body-sm">
+<span class="material-symbols-outlined text-[16px] text-secondary">verified_user</span>
+<span>Submitted directly to your manager <span class="font-semibold text-on-surface">Sarah Jenkins</span></span>
+</div>
+</div>
+<section class="mb-6">
+<div class="flex items-center justify-between mb-2.5">
+<span class="font-label-lg text-label-lg text-on-surface tracking-tight">Step 1: Request Category</span>
+<span class="font-code-sm text-code-sm text-secondary bg-surface-container-high px-2 py-0.5 rounded-full font-medium">1 of 2</span>
+</div>
+<div aria-label="Request Type Selection" class="grid grid-cols-3 gap-2.5" role="radiogroup">
+<button aria-checked="true" class="category-btn flex flex-col items-center text-center p-3 rounded-xl bg-surface-container-lowest shadow-sm transition-all text-on-primary-container relative overflow-hidden ring-2 ring-secondary" id="type-leave" onclick="selectCategory('leave')" type="button">
+<div class="w-10 h-10 rounded-full bg-surface-container-high flex items-center justify-center mb-2 text-secondary">
+<span class="material-symbols-outlined text-[22px]" style="font-variation-settings: 'FILL' 1;">calendar_today</span>
+</div>
+<span class="font-title-md text-title-md text-on-surface leading-tight">Leave</span>
+<span class="font-label-sm text-label-sm text-on-surface-variant mt-1 line-clamp-1">Annual, sick</span>
+<div class="absolute top-1.5 right-1.5 w-2 h-2 rounded-full bg-secondary indicator-dot"></div>
+</button>
+<button aria-checked="false" class="category-btn flex flex-col items-center text-center p-3 rounded-xl bg-surface-container-lowest shadow-sm transition-all text-on-surface relative overflow-hidden" id="type-equipment" onclick="selectCategory('equipment')" type="button">
+<div class="w-10 h-10 rounded-full bg-surface-container-low flex items-center justify-center mb-2 text-outline">
+<span class="material-symbols-outlined text-[22px]">laptop_mac</span>
+</div>
+<span class="font-title-md text-title-md text-on-surface leading-tight">Equipment</span>
+<span class="font-label-sm text-label-sm text-on-surface-variant mt-1 line-clamp-1">Hardware</span>
+<div class="absolute top-1.5 right-1.5 w-2 h-2 rounded-full bg-transparent indicator-dot"></div>
+</button>
+<button aria-checked="false" class="category-btn flex flex-col items-center text-center p-3 rounded-xl bg-surface-container-lowest shadow-sm transition-all text-on-surface relative overflow-hidden" id="type-it" onclick="selectCategory('it')" type="button">
+<div class="w-10 h-10 rounded-full bg-surface-container-low flex items-center justify-center mb-2 text-outline">
+<span class="material-symbols-outlined text-[22px]">lock_reset</span>
+</div>
+<span class="font-title-md text-title-md text-on-surface leading-tight">IT Support</span>
+<span class="font-label-sm text-label-sm text-on-surface-variant mt-1 line-clamp-1">Permissions</span>
+<div class="absolute top-1.5 right-1.5 w-2 h-2 rounded-full bg-transparent indicator-dot"></div>
+</button>
+</div>
+</section>
+<form class="flex flex-col gap-5" onsubmit="event.preventDefault(); triggerCelebration();">
+<div class="flex flex-col gap-1.5">
+<div class="flex items-center justify-between">
+<label class="font-label-lg text-label-lg text-on-surface" for="request-title">Request Title</label>
+<span class="font-code-sm text-code-sm text-on-surface-variant" id="char-counter">27 / 120</span>
+</div>
+<div class="relative">
+<input class="w-full h-12 px-3.5 rounded-lg bg-surface-container-lowest text-on-surface font-body-md text-body-md shadow-sm outline-none transition-all focus:ring-2 focus:ring-secondary focus:bg-surface" id="request-title" maxlength="120" oninput="updateCharCounter(this.value)" placeholder="e.g. Annual Summer Vacation" type="text" value="Annual Summer Vacation"/>
+<div class="absolute right-3.5 top-1/2 -translate-y-1/2 text-secondary flex items-center">
+<span class="material-symbols-outlined text-[18px]">check_circle</span>
+</div>
+</div>
+<div class="flex items-center justify-between font-label-sm text-label-sm text-on-surface-variant px-0.5">
+<span>3-120 characters required</span>
+<span class="text-secondary font-medium">Valid entry</span>
+</div>
+</div>
+<div class="flex flex-col gap-3 p-3.5 bg-surface-container-low rounded-xl shadow-sm transition-all" id="leave-dates-wrapper">
+<div class="flex items-center justify-between">
+<div class="flex items-center gap-1.5">
+<span class="material-symbols-outlined text-secondary text-[20px]">date_range</span>
+<span class="font-label-lg text-label-lg text-on-surface">Leave Duration</span>
+</div>
+<div class="flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-secondary-fixed text-on-secondary-fixed font-code-sm text-code-sm font-semibold">
+<span class="material-symbols-outlined text-[14px]">timelapse</span>
+<span>5 working days</span>
+</div>
+</div>
+<div class="grid grid-cols-2 gap-2.5">
+<div class="flex flex-col gap-1">
+<label class="font-label-sm text-label-sm text-on-surface-variant">Start Date</label>
+<div class="flex items-center justify-between h-11 px-3 bg-surface-container-lowest rounded-lg shadow-sm">
+<span class="font-body-md text-body-md text-on-surface font-medium">Jun 12, 2025</span>
+<span class="material-symbols-outlined text-[18px] text-on-surface-variant">calendar_month</span>
+</div>
+</div>
+<div class="flex flex-col gap-1">
+<label class="font-label-sm text-label-sm text-on-surface-variant">End Date</label>
+<div class="flex items-center justify-between h-11 px-3 bg-surface-container-lowest rounded-lg shadow-sm">
+<span class="font-body-md text-body-md text-on-surface font-medium">Jun 19, 2025</span>
+<span class="material-symbols-outlined text-[18px] text-on-surface-variant">event</span>
+</div>
+</div>
+</div>
+<div class="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg bg-surface-container-high text-on-surface font-label-sm text-label-sm">
+<span class="material-symbols-outlined text-[16px] text-secondary">check</span>
+<span>End date complies with schedule policy (after start date)</span>
+</div>
+</div>
+<div class="flex flex-col gap-1.5">
+<div class="flex items-center justify-between">
+<label class="font-label-lg text-label-lg text-on-surface" for="request-desc">Business Justification</label>
+<span class="font-label-sm text-label-sm text-on-surface-variant">Recommended</span>
+</div>
+<textarea class="w-full p-3.5 rounded-lg bg-surface-container-lowest text-on-surface font-body-md text-body-md shadow-sm outline-none resize-none transition-all focus:ring-2 focus:ring-secondary focus:bg-surface" id="request-desc" placeholder="Provide context, coverage details, or urgent dependencies..." rows="3">Taking approved PTO for family vacation; coverage coordinated with Maya.</textarea>
+<div class="flex items-center gap-1.5 text-on-surface-variant font-label-sm text-label-sm px-0.5">
+<span class="material-symbols-outlined text-[14px]">info</span>
+<span>Maya Lin accepted delegate status for approvals during this period.</span>
+</div>
+</div>
+<div class="p-3.5 bg-surface-container-lowest rounded-xl shadow-sm flex items-start gap-3">
+<div class="w-8 h-8 rounded-full bg-surface-container-high flex items-center justify-center shrink-0 text-secondary">
+<span class="material-symbols-outlined text-[18px]">notifications_active</span>
+</div>
+<div class="flex flex-col">
+<span class="font-label-lg text-label-lg text-on-surface">Estimated SLA Notice</span>
+<p class="font-body-sm text-body-sm text-on-surface-variant mt-0.5">
+          Typically reviewed within <span class="font-semibold text-on-surface">24 hours</span>. You will receive an immediate push alert once signed.
+        </p>
+</div>
+</div>
+<div class="flex flex-col gap-3 mt-2">
+<button class="w-full h-12 rounded-lg bg-secondary text-on-secondary font-label-lg text-label-lg flex items-center justify-center gap-2 shadow-md active:scale-[0.98] transition-all" id="submit-btn" type="submit">
+<span>Submit Request</span>
+<span class="material-symbols-outlined text-[18px]">arrow_forward</span>
+</button>
+<div class="flex items-center justify-center gap-6">
+<button class="font-label-md text-label-md text-secondary py-2 flex items-center gap-1 hover:underline" onclick="saveDraftToast()" type="button">
+<span class="material-symbols-outlined text-[16px]">bookmark_border</span>
+<span>Save as Draft</span>
+</button>
+<span class="w-1 h-1 rounded-full bg-outline-variant"></span>
+<button class="font-label-md text-label-md text-on-surface-variant py-2 hover:text-on-surface" onclick="history.back()" type="button">
+          Cancel
+        </button>
+</div>
+</div>
+</form>
+<div class="fixed bottom-6 left-4 right-4 bg-on-surface text-surface rounded-xl p-3 shadow-xl flex items-center gap-3 transition-all duration-300 opacity-0 pointer-events-none translate-y-3 z-50" id="toast">
+<div class="w-7 h-7 rounded-full bg-secondary flex items-center justify-center shrink-0 text-on-secondary">
+<span class="material-symbols-outlined text-[18px]">check</span>
+</div>
+<span class="font-body-sm text-body-sm flex-1" id="toast-text">Draft saved securely to device</span>
+</div>
+</div>
+<script>
+  function selectCategory(category) {
+    const cards = ['leave', 'equipment', 'it'];
+    cards.forEach(c => {
+      const el = document.getElementById('type-' + c);
+      const dot = el.querySelector('.indicator-dot');
+      if (c === category) {
+        el.classList.add('ring-2', 'ring-secondary');
+        el.setAttribute('aria-checked', 'true');
+        dot.classList.remove('bg-transparent');
+        dot.classList.add('bg-secondary');
+      } else {
+        el.classList.remove('ring-2', 'ring-secondary');
+        el.setAttribute('aria-checked', 'false');
+        dot.classList.remove('bg-secondary');
+        dot.classList.add('bg-transparent');
+      }
+    });
+
+    const leaveSection = document.getElementById('leave-dates-wrapper');
+    if (category === 'leave') {
+      leaveSection.style.display = 'flex';
+    } else {
+      leaveSection.style.display = 'none';
+    }
+  }
+
+  function updateCharCounter(val) {
+    const counter = document.getElementById('char-counter');
+    counter.innerText = val.length + ' / 120';
+  }
+
+  function showToast(msg) {
+    const toast = document.getElementById('toast');
+    const toastText = document.getElementById('toast-text');
+    toastText.innerText = msg;
+    toast.classList.remove('opacity-0', 'pointer-events-none', 'translate-y-3');
+    setTimeout(() => {
+      toast.classList.add('opacity-0', 'pointer-events-none', 'translate-y-3');
+    }, 2800);
+  }
+
+  function saveDraftToast() {
+    showToast('Draft updated and synced with cloud cache.');
+  }
+
+  function triggerCelebration() {
+    const submitBtn = document.getElementById('submit-btn');
+    submitBtn.innerHTML = '<span class="material-symbols-outlined text-[20px] animate-spin">refresh</span><span>Transmitting...</span>';
+    setTimeout(() => {
+      submitBtn.innerHTML = '<span class="material-symbols-outlined text-[20px]">check</span><span>Submitted to Sarah!</span>';
+      showToast('Request submitted successfully! Tracking ID #REQ-8821');
+    }, 800);
+  }
+</script></main></body></html>
